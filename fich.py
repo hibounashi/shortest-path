@@ -1,6 +1,5 @@
 import tkinter as tk
-from tkinter import ttk
-from tkinter import messagebox
+from tkinter import ttk, messagebox
 import networkx as nx
 import matplotlib.pyplot as plt
 import heapq
@@ -17,7 +16,6 @@ def astar(graph, start, goal):
     g_score = {node: float('inf') for node in graph.nodes}  
     g_score[start] = 0
     
-    # Algorithme A*
     while open_set:
         current_cost, current_node = heapq.heappop(open_set)
         if current_node == goal:
@@ -28,6 +26,7 @@ def astar(graph, start, goal):
             path.append(start)
             path.reverse()
             return path
+        
         for u, v, key, edge_data in graph.edges(keys=True, data=True):
             if u == current_node:
                 if 'length' in edge_data:
@@ -62,17 +61,18 @@ def find_shortest_path():
 osm_file_path = r'.\map.osm'
 graphml_file_path = r'.\map.graphml'
 
-# Convertir le fichier OSM en GraphML
-graph = ox.graph_from_xml(osm_file_path)
-ox.save_graphml(graph, graphml_file_path)
+# Convert OSM file to GraphML if not already done
+if not os.path.exists(graphml_file_path):
+    graph = ox.graph_from_xml(osm_file_path)
+    ox.save_graphml(graph, graphml_file_path)
 
-# Chargez le graphe depuis le fichier GraphML
+# Load the graph from GraphML file
 graph = nx.read_graphml(graphml_file_path)
 
-# Créer une interface utilisateur
+# Create UI
 root = tk.Tk()
 root.title("Shortest Path Finder")
-root.geometry("600x400")  # Adjust the size of the root window
+root.geometry("600x400")
 
 style = ttk.Style(root)
 style.configure('TButton', font=('calibri', 10, 'bold'), foreground='pink', background='pink')
@@ -82,7 +82,6 @@ style.configure('TCombobox', font=('calibri', 10))
 frame = ttk.Frame(root)
 frame.grid(padx=10, pady=10)
 
-# Title label
 title_label = ttk.Label(frame, text="Choose Your Position and Destination", font=('calibri', 14, 'bold'))
 title_label.grid(row=0, column=0, columnspan=2, pady=10)
 
@@ -101,7 +100,6 @@ goal_combo.grid(row=2, column=1, padx=5, pady=5)
 find_path_button = ttk.Button(frame, text="Find Shortest Path", command=find_shortest_path, style='TButton')
 find_path_button.grid(row=3, column=0, columnspan=2, padx=8, pady=6, sticky="we")
 
-# Center the frame within the root window
 frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
 root.mainloop()
