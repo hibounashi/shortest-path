@@ -4,6 +4,7 @@ import networkx as nx
 import matplotlib.pyplot as plt
 import heapq
 import osmnx as ox
+import os
 
 def astar(graph, start, goal):
     def heuristic(node):
@@ -72,33 +73,37 @@ graph = nx.read_graphml(graphml_file_path)
 # Create UI
 root = tk.Tk()
 root.title("Shortest Path Finder")
-root.geometry("600x400")
+root.geometry("800x600")  # Larger window size
 
 style = ttk.Style(root)
-style.configure('TButton', font=('calibri', 10, 'bold'), foreground='pink', background='pink')
-style.configure('TLabel', font=('calibri', 10), foreground='#007bff')
-style.configure('TCombobox', font=('calibri', 10))
+style.theme_use('clam')  # Change the theme to 'clam'
+
+# Update the font and color for all widgets
+style.configure('.', font=('Helvetica', 12))
+style.configure('TButton', foreground='white', background='#1C4D7B', padding=10, width=20)
+style.configure('TLabel', foreground='#1C4D7B')
+style.configure('TCombobox', foreground='#1C4D7B', fieldbackground='white')
 
 frame = ttk.Frame(root)
-frame.grid(padx=10, pady=10)
+frame.grid(padx=20, pady=20)
 
-title_label = ttk.Label(frame, text="Choose Your Position and Destination", font=('calibri', 14, 'bold'))
-title_label.grid(row=0, column=0, columnspan=2, pady=10)
+title_label = ttk.Label(frame, text="Choose Your Position and Destination", font=('Helvetica', 16, 'bold'))
+title_label.grid(row=0, column=0, columnspan=2, pady=20)
 
-start_label = ttk.Label(frame, text="Start Node:", style="Pink.TLabel")
-start_label.grid(row=1, column=0, padx=5, pady=5, sticky="e")
+start_label = ttk.Label(frame, text="Start Node:")
+start_label.grid(row=1, column=0, padx=10, pady=10, sticky="e")
 
 start_combo = ttk.Combobox(frame, values=list(graph.nodes), state="readonly")
-start_combo.grid(row=1, column=1, padx=5, pady=5)
+start_combo.grid(row=1, column=1, padx=10, pady=10)
 
 goal_label = ttk.Label(frame, text="Goal Node:")
-goal_label.grid(row=2, column=0, padx=5, pady=5, sticky="e")
+goal_label.grid(row=2, column=0, padx=10, pady=10, sticky="e")
 
 goal_combo = ttk.Combobox(frame, values=list(graph.nodes), state="readonly")
-goal_combo.grid(row=2, column=1, padx=5, pady=5)
+goal_combo.grid(row=2, column=1, padx=10, pady=10)
 
-find_path_button = ttk.Button(frame, text="Find Shortest Path", command=find_shortest_path, style='TButton')
-find_path_button.grid(row=3, column=0, columnspan=2, padx=8, pady=6, sticky="we")
+find_path_button = ttk.Button(frame, text="Find Shortest Path", command=find_shortest_path)
+find_path_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="we")
 
 frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
