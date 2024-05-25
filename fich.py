@@ -76,19 +76,15 @@ root.title("Shortest Path Finder")
 root.geometry("800x600")  # Larger window size
 
 style = ttk.Style(root)
-style.theme_use('clam')  # Change the theme to 'clam'
-
-# Update the font and color for all widgets
-style.configure('.', font=('Helvetica', 12))
-style.configure('TButton', foreground='white', background='#1C4D7B', padding=10, width=20)
-style.configure('TLabel', foreground='#1C4D7B')
-style.configure('TCombobox', foreground='#1C4D7B', fieldbackground='white')
+style.configure('TButton', font=('calibri', 12, 'bold'), foreground='black', background='lightblue')  # Button styling
+style.configure('TLabel', font=('calibri', 12), foreground='black')  # Label styling
+style.configure('TCombobox', font=('calibri', 12), foreground='black', background='lightgrey')  # Combobox styling
 
 frame = ttk.Frame(root)
-frame.grid(padx=20, pady=20)
+frame.grid(padx=20, pady=20)  # Padding increased
 
-title_label = ttk.Label(frame, text="Choose Your Position and Destination", font=('Helvetica', 16, 'bold'))
-title_label.grid(row=0, column=0, columnspan=2, pady=20)
+title_label = ttk.Label(frame, text="Choose Your Position and Destination", font=('calibri', 16, 'bold'))
+title_label.grid(row=0, column=0, columnspan=2, pady=20)  # Title label padding increased
 
 start_label = ttk.Label(frame, text="Start Node:")
 start_label.grid(row=1, column=0, padx=10, pady=10, sticky="e")
@@ -102,7 +98,7 @@ goal_label.grid(row=2, column=0, padx=10, pady=10, sticky="e")
 goal_combo = ttk.Combobox(frame, values=list(graph.nodes), state="readonly")
 goal_combo.grid(row=2, column=1, padx=10, pady=10)
 
-find_path_button = ttk.Button(frame, text="Find Shortest Path", command=find_shortest_path)
+find_path_button = ttk.Button(frame, text="Search", command=find_shortest_path, style='TButton')
 find_path_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="we")
 
 frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
