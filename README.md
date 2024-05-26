@@ -9,4 +9,4 @@ This project is a GUI-based application to find the shortest path between two no
 - Visualize the shortest path on the map.
 
 ## the interface
-img("")
+img("screenshot.png")
