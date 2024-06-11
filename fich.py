@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import heapq
 import osmnx as ox
 import os
+import folium
 
 def astar(graph, start, goal):
     def heuristic(node):
@@ -42,64 +43,94 @@ def astar(graph, start, goal):
     
     return None
 
-def find_shortest_path():
+def plot_shortest_path(graph, shortest_path):
+    nodes_coordinates = {node: (float(graph.nodes[node]['y']), float(graph.nodes[node]['x'])) for node in graph.nodes}
+    
+    G_map = folium.Map(location=[nodes_coordinates[shortest_path[0]][0], nodes_coordinates[shortest_path[0]][1]], zoom_start=14)
+    
+    for node in shortest_path:
+        folium.Marker(location=[nodes_coordinates[node][0], nodes_coordinates[node][1]], popup=str(node), icon=folium.Icon(color='red')).add_to(G_map)
+    
+    folium.PolyLine(locations=[nodes_coordinates[node] for node in shortest_path], color="red").add_to(G_map)
+    
+    return G_map
+
+def find_shortest_path(city):
     start_node = start_combo.get()
     goal_node = goal_combo.get()
     
-    shortest_path = astar(graph, start_node, goal_node)
+    shortest_path = astar(graph[city], start_node, goal_node)
 
     if shortest_path:
-        shortest_path_edges = [(shortest_path[i], shortest_path[i+1]) for i in range(len(shortest_path)-1)]
-        plt.figure(figsize=(10, 8))
-        pos = nx.spring_layout(graph)  
-        nx.draw(graph, pos, with_labels=True, node_size=300, node_color='skyblue')
-        nx.draw_networkx_edges(graph, pos, edgelist=shortest_path_edges, width=4, edge_color='pink', arrows=True)  
-        plt.title(f"Shortest Path from {start_node} to {goal_node}")
-        plt.show()
+        map_with_path = plot_shortest_path(graph[city], shortest_path)
+        map_with_path.save("shortest_path.html")
+        os.system("shortest_path.html")
     else:
         messagebox.showinfo("No Path Found", "No path found between the given nodes.")
 
-osm_file_path = r'.\map.osm'
-graphml_file_path = r'.\map.graphml'
+def city_selected(event):
+    selected_city = city_combo.get()
+    start_combo['values'] = list(graph[selected_city].nodes)
+    goal_combo['values'] = list(graph[selected_city].nodes)
+
+osm_files = {
+    'Algiers': r'.\algiers_map.osm',
+    'Bejaia': r'.\bejaia_map.osm'
+}
+
+graphml_files = {
+    'Algiers': r'.\algiers_map.graphml',
+    'Bejaia': r'.\bejaia_map.graphml'
+}
+
+graph = {}
 
 # Convert OSM file to GraphML if not already done
-if not os.path.exists(graphml_file_path):
-    graph = ox.graph_from_xml(osm_file_path)
-    ox.save_graphml(graph, graphml_file_path)
-
-# Load the graph from GraphML file
-graph = nx.read_graphml(graphml_file_path)
+for city, osm_file_path in osm_files.items():
+    if not os.path.exists(graphml_files[city]):
+        graph[city] = ox.graph_from_xml(osm_file_path)
+        ox.save_graphml(graph[city], graphml_files[city])
+    else:
+        graph[city] = nx.read_graphml(graphml_files[city])
 
 # Create UI
 root = tk.Tk()
 root.title("Shortest Path Finder")
-root.geometry("800x600")  # Larger window size
+root.geometry("800x600")
 
 style = ttk.Style(root)
-style.configure('TButton', font=('calibri', 12, 'bold'), foreground='black', background='lightblue')  # Button styling
-style.configure('TLabel', font=('calibri', 12), foreground='black')  # Label styling
-style.configure('TCombobox', font=('calibri', 12), foreground='black', background='lightgrey')  # Combobox styling
+style.configure('TButton', font=('calibri', 12, 'bold'), foreground='black', background='lightblue')
+style.configure('TLabel', font=('calibri', 12), foreground='black')
+style.configure('TCombobox', font=('calibri', 12), foreground='black', background='lightgrey')
 
 frame = ttk.Frame(root)
-frame.grid(padx=20, pady=20)  # Padding increased
+frame.grid(padx=20, pady=20)
 
-title_label = ttk.Label(frame, text="Choose Your Position and Destination", font=('calibri', 16, 'bold'))
-title_label.grid(row=0, column=0, columnspan=2, pady=20)  # Title label padding increased
+title_label = ttk.Label(frame, text="Choose The Appropriate Value ", font=('calibri', 16, 'bold'))
+title_label.grid(row=0, column=0, columnspan=2, pady=20)
 
-start_label = ttk.Label(frame, text="Start Node:")
-start_label.grid(row=1, column=0, padx=10, pady=10, sticky="e")
+city_label = ttk.Label(frame, text="Select City:")
+city_label.grid(row=1, column=0, padx=10, pady=10, sticky="e")
 
-start_combo = ttk.Combobox(frame, values=list(graph.nodes), state="readonly")
-start_combo.grid(row=1, column=1, padx=10, pady=10)
+cities = list(osm_files.keys())
+city_combo = ttk.Combobox(frame, values=cities, state="readonly")
+city_combo.grid(row=1, column=1, padx=10, pady=10)
+city_combo.bind("<<ComboboxSelected>>", city_selected)
 
-goal_label = ttk.Label(frame, text="Goal Node:")
-goal_label.grid(row=2, column=0, padx=10, pady=10, sticky="e")
+start_label = ttk.Label(frame, text="from:")
+start_label.grid(row=2, column=0, padx=10, pady=10, sticky="e")
 
-goal_combo = ttk.Combobox(frame, values=list(graph.nodes), state="readonly")
-goal_combo.grid(row=2, column=1, padx=10, pady=10)
+start_combo = ttk.Combobox(frame, values=[], state="readonly")
+start_combo.grid(row=2, column=1, padx=10, pady=10)
 
-find_path_button = ttk.Button(frame, text="Search", command=find_shortest_path, style='TButton')
-find_path_button.grid(row=3, column=0, columnspan=2, padx=10, pady=10, sticky="we")
+goal_label = ttk.Label(frame, text="to:")
+goal_label.grid(row=3, column=0, padx=10, pady=10, sticky="e")
+
+goal_combo = ttk.Combobox(frame, values=[], state="readonly")
+goal_combo.grid(row=3, column=1, padx=10, pady=10)
+
+find_path_button = ttk.Button(frame, text="Search", command=lambda: find_shortest_path(city_combo.get()), style='TButton')
+find_path_button.grid(row=4, column=0, columnspan=2, padx=10, pady=10, sticky="we")
 
 frame.place(relx=0.5, rely=0.5, anchor=tk.CENTER)
 
